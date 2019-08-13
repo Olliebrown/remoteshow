@@ -18,6 +18,29 @@
           padding-bottom:20px;
           height:200px;
       }
+
+      .thumbnail {
+        display: inline-block;
+        margin-right: 5px;
+        margin-left: 5px;
+      }
+
+      .thumbnail img {
+        height: 150px;
+        margin-bottom: -20px;
+      }
+
+      .thumbnail .label {
+        position: relative;
+        left: 5px;
+        top: -5px;
+      }
+
+      .thumb-scroller {
+        overflow-x: scroll;
+        width: 100%;
+        white-space: nowrap;
+      }
     </style>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -92,6 +115,13 @@
                     </div>
                     <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                       <h3><small id="nextNote" class="pull-right">next</small></h3>
+                    </div>
+                  </div>
+                </li>
+
+                <li class="list-group-item">
+                  <div class="row">
+                    <div class="thumb-scroller" id="thumbnailScroll">
                     </div>
                   </div>
                 </li>

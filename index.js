@@ -1,6 +1,7 @@
 import Express from 'express'
-import SlideShow from 'slideshow'
+import SlideShow from '../showyslides/showy-api'
 import path from 'path'
+import fs from 'fs'
 
 // Make an HTTP server
 let app = new Express()
@@ -8,6 +9,7 @@ let app = new Express()
 // Make a slideshow object
 let ppt = new SlideShow('powerpoint')
 let showInfo = {}
+let showFiles = []
 
 async function startup (filename) {
   // Make sure powerpoint is running
@@ -21,25 +23,36 @@ async function startup (filename) {
     }
   }
 
-  // Close the current file, if any
-  // try {
-  //   await ppt.close()
-  // } catch (err) {
-  //   if (err !== 'still no active presentation') {
-  //     console.log('ERROR: failed to close current presentation.')
-  //     console.log(err)
-  //     return { error: err }
-  //   }
-  // }
+  if (filename) {
+    // Close the current file (if any) before opening a new one
+    try {
+      await ppt.close()
+    } catch (err) {
+      if (err !== 'No presentation loaded') {
+        console.log('ERROR: failed to close current presentation.')
+        console.log(err)
+        return { error: err }
+      }
+    }
 
+    // Try to open the indicated filename
+    try {
+      console.log(`Opening ${filename}`)
+      await ppt.open(path.join(__dirname, filename))
+    } catch (err) {
+      console.log('ERROR: failed to load slideshow')
+      console.log(err)
+      return { error: err }
+    }
+  }
+
+  // Update show info, thumbnails and state
   try {
-    // console.log(`Opening ${filename}`)
-    // await ppt.open(path.resolve(__dirname, filename))
     showInfo = await getShowInfo()
     await getShowThumbnails()
     return await getShowState()
   } catch (err) {
-    console.log('ERROR: failed to load slideshow')
+    console.log('ERROR: could not retrieve basic info')
     console.log(err)
     return { error: err }
   }
@@ -145,7 +158,8 @@ async function getShowInfo () {
 
 async function getShowThumbnails () {
   try {
-    return await ppt.thumbs(path.resolve('./public/images/thumbs/'))
+    let thumbPath = path.join(__dirname, '/public/images/')
+    return await ppt.thumbs(thumbPath)
   } catch (err) {
     console.log('ERROR: ppt.thumbs failed')
     console.log(err)
@@ -166,6 +180,10 @@ app.get('/state', async (req, res) => {
   } catch (err) {
     res.send({ ok: false, error: err })
   }
+})
+
+app.get('/files', async (req, res) => {
+  res.send({ ok: true, files: showFiles })
 })
 
 app.get('/info', async (req, res) => {
@@ -255,8 +273,18 @@ app.get('/jumpToSlide/:slideIndex', async (req, res) => {
 // Look for static content to satisfy the request
 app.use(Express.static('./public'))
 
+// Get list of all powerpoint slides
+let filelist = fs.readdirSync(path.join(__dirname, '/public/slideshows'))
+showFiles = filelist.filter((file) => {
+  return (file.match(/(\.pptm|\.pptx|\.ppt|\.key|\.odp|\.otp)$/) != null)
+})
+
 // Startup powerpoint
-startup('ShowSlides-MusicalPartners.pptx')
+let fileToOpen = ''
+if (showFiles.length > 0) {
+  fileToOpen = path.join(__dirname, '/public/slideshows/', showFiles[0])
+}
+startup() // fileToOpen)
 
 // Start the server
 let server = app.listen(8675)

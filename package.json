@@ -16,6 +16,7 @@
     "@babel/node": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "express": "^4.17.1",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.1",
+    "showyslides": "^1.0.3"
   }
 }

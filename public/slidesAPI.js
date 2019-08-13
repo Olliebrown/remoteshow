@@ -32,6 +32,9 @@ function updateStatus (status) {
 
   // Update slide number
   lastSlideNumber = status.position
+
+  // Update the thumbnail scroller
+  buildThumbnailScroller(status.slides)
 }
 
 function disableInput (message) {
@@ -59,6 +62,15 @@ function updateInfo (info) {
   slidesInfo = info
 }
 
+function gotoSlide (event) {
+  event.preventDefault()
+  disableInput('Changing Slides ...')
+  let url = $(event.currentTarget).attr('href')
+  $.get(url, {}, (data) => {
+    updateStatus(data.state)
+  }, 'json')
+}
+
 function pollCurrentState () {
   // Update current state
   $.get('state', {}, (data) => {
@@ -69,6 +81,24 @@ function pollCurrentState () {
   $.get('info', {}, (data) => {
     updateInfo(data.info)
   }, 'json')
+}
+
+function buildThumbnail (slideNum) {
+  let thumbDiv = $('<a />').addClass('thumbnail').attr('href', `jumpToSlide/${slideNum}`)
+  let imgElem = $('<img />').attr('src', `images/thumbs/Slide${slideNum}.jpeg`)
+  let labelElem = $('<span />').addClass('label label-primary').text(slideNum)
+  thumbDiv.append(imgElem)
+  thumbDiv.append(labelElem)
+  thumbDiv.click(gotoSlide)
+  return thumbDiv
+}
+
+function buildThumbnailScroller (slideCount) {
+  $('#thumbnailScroll').empty()
+  for (let i = 0; i < slideCount; i++) {
+    let newThumb = buildThumbnail(i + 1)
+    $('#thumbnailScroll').append(newThumb)
+  }
 }
 
 $(document).ready(() => {
