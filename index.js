@@ -1,5 +1,5 @@
 import Express from 'express'
-import SlideShow from '../showyslides/showy-api'
+import SlideShow from 'showyslides'
 import path from 'path'
 import fs from 'fs'
 
