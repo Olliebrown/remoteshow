@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+
+public/images/
+public/images/**/*
+
+*.pptm
+*.pptx
+*.ppt
+*.key
+*.odp
+*.otp

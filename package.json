@@ -1,0 +1,21 @@
+{
+  "name": "remoteshow",
+  "version": "1.0.0",
+  "description": "A simple program to control powerpoint remotely through an http server.",
+  "main": "index.js",
+  "scripts": {
+    "serv": "nodemon --exec babel-node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Seth Berrier",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.1"
+  }
+}
