@@ -4,19 +4,24 @@
   "description": "A simple program to control powerpoint remotely through an http server.",
   "main": "index.js",
   "scripts": {
-    "serv": "nodemon --exec babel-node index.js",
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "type": "module",
   "author": "Seth Berrier",
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/node": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
     "express": "^4.17.1",
-    "nodemon": "^1.19.1",
-    "showyslides": "^1.0.3"
+    "showyslides": "file:../showy"
+  },
+  "devDependencies": {
+    "esbuild": "^0.12.19",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "nodemon": "^2.0.12"
   }
 }

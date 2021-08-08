@@ -4,10 +4,10 @@ import path from 'path'
 import fs from 'fs'
 
 // Make an HTTP server
-let app = new Express()
+const app = new Express()
 
 // Make a slideshow object
-let ppt = new SlideShow('powerpoint')
+const ppt = new SlideShow('powerpoint')
 let showInfo = {}
 let showFiles = []
 
@@ -38,7 +38,7 @@ async function startup (filename) {
     // Try to open the indicated filename
     try {
       console.log(`Opening ${filename}`)
-      await ppt.open(path.join(__dirname, filename))
+      await ppt.open(path.join('./', filename))
     } catch (err) {
       console.log('ERROR: failed to load slideshow')
       console.log(err)
@@ -118,7 +118,7 @@ async function getShowState () {
   }
 
   try {
-    let state = await ppt.stat()
+    const state = await ppt.stat()
     state.buildSteps = state.steps
     if (state.position < 1 || state.position > showInfo.titles.length) {
       state.slideTitle = '??'
@@ -158,7 +158,7 @@ async function getShowInfo () {
 
 async function getShowThumbnails () {
   try {
-    let thumbPath = path.join(__dirname, '/public/images/')
+    const thumbPath = path.join('./', '/public/images/')
     return await ppt.thumbs(thumbPath)
   } catch (err) {
     console.log('ERROR: ppt.thumbs failed')
@@ -175,7 +175,7 @@ app.use((req, res, next) => {
 
 app.get('/state', async (req, res) => {
   try {
-    let showState = await getShowState()
+    const showState = await getShowState()
     res.send({ ok: true, state: showState })
   } catch (err) {
     res.send({ ok: false, error: err })
@@ -188,7 +188,7 @@ app.get('/files', async (req, res) => {
 
 app.get('/info', async (req, res) => {
   try {
-    let showInfo = await getShowInfo()
+    const showInfo = await getShowInfo()
     res.send({ ok: true, info: showInfo })
   } catch (err) {
     res.send({ ok: false, error: err })
@@ -207,7 +207,7 @@ app.get('/thumbs', async (req, res) => {
 app.get('/startSlideshow', async (req, res) => {
   try {
     await startSlideshow()
-    let showState = await gotoSlide(1)
+    const showState = await gotoSlide(1)
     if (showState.error) {
       res.send({ ok: false, state: showState })
     } else {
@@ -220,7 +220,7 @@ app.get('/startSlideshow', async (req, res) => {
 
 app.get('/stopSlideshow', async (req, res) => {
   try {
-    let showState = await stopSlideshow()
+    const showState = await stopSlideshow()
     if (showState.error) {
       res.send({ ok: false, state: showState })
     } else {
@@ -233,7 +233,7 @@ app.get('/stopSlideshow', async (req, res) => {
 
 app.get('/nextSlide', async (req, res) => {
   try {
-    let showState = await nextSlide()
+    const showState = await nextSlide()
     if (showState.error) {
       res.send({ ok: false, state: showState })
     } else {
@@ -246,7 +246,7 @@ app.get('/nextSlide', async (req, res) => {
 
 app.get('/previousSlide', async (req, res) => {
   try {
-    let showState = await prevSlide()
+    const showState = await prevSlide()
     if (showState.error) {
       res.send({ ok: false, state: showState })
     } else {
@@ -259,7 +259,7 @@ app.get('/previousSlide', async (req, res) => {
 
 app.get('/jumpToSlide/:slideIndex', async (req, res) => {
   try {
-    let showState = await gotoSlide(parseInt(req.params.slideIndex))
+    const showState = await gotoSlide(parseInt(req.params.slideIndex))
     if (showState.error) {
       res.send({ ok: false, state: showState })
     } else {
@@ -274,18 +274,18 @@ app.get('/jumpToSlide/:slideIndex', async (req, res) => {
 app.use(Express.static('./public'))
 
 // Get list of all powerpoint slides
-let filelist = fs.readdirSync(path.join(__dirname, '/public/slideshows'))
-showFiles = filelist.filter((file) => {
+const fileList = fs.readdirSync(path.join('./', '/public/slideshows'))
+showFiles = fileList.filter((file) => {
   return (file.match(/(\.pptm|\.pptx|\.ppt|\.key|\.odp|\.otp)$/) != null)
 })
 
-// Startup powerpoint
+// Startup PowerPoint
 let fileToOpen = ''
 if (showFiles.length > 0) {
-  fileToOpen = path.join(__dirname, '/public/slideshows/', showFiles[0])
+  fileToOpen = path.join('./', '/public/slideshows/', showFiles[0])
 }
-startup() // fileToOpen)
+startup(fileToOpen)
 
 // Start the server
-let server = app.listen(8675)
-console.info(`Server running at port 8675`)
+app.listen(8675)
+console.info('Server running at port 8675')
