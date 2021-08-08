@@ -280,11 +280,11 @@ showFiles = fileList.filter((file) => {
 })
 
 // Startup PowerPoint
-let fileToOpen = ''
-if (showFiles.length > 0) {
-  fileToOpen = path.join('./', '/public/slideshows/', showFiles[0])
-}
-startup(fileToOpen)
+// let fileToOpen = ''
+// if (showFiles.length > 0) {
+//   fileToOpen = path.join('./', '/public/slideshows/', showFiles[0])
+// }
+startup() // fileToOpen)
 
 // Start the server
 app.listen(8675)
