@@ -8,6 +8,21 @@ let keyInputEnabled = true
 let lastSlideNumber = -1
 let curBuild = 1
 
+function getTitle (title, notes) {
+  // If there's a title, use it
+  if (typeof title === 'string' && title !== '') {
+    return title
+  }
+
+  // Fall back to the first line of the notes
+  if (typeof notes === 'string' && notes !== '') {
+    return notes.split(/\r?\n/)[0]
+  }
+
+  // Nothing to use
+  return 'n/a'
+}
+
 function updateStatus (status) {
   // Check if slide advanced
   if (status.position !== lastSlideNumber) {
@@ -23,9 +38,9 @@ function updateStatus (status) {
   $('#curBuild').text(curBuild)
   $('#buildSteps').text(status.buildSteps)
 
-  $('#prevNote').text(status.prevNote.split(/~/)[0])
-  $('#curNote').text(status.slideNote.split(/~/)[0])
-  $('#nextNote').text(status.nextNote.split(/~/)[0])
+  $('#prevNote').text(getTitle(status.prevTitle, status.prevNote))
+  $('#curNote').text(getTitle(status.slideTitle, status.slideNote))
+  $('#nextNote').text(getTitle(status.nextTitle, status.nextNote))
 
   // Wait one second before restoring input (avoids accidental double-clicks!)
   setTimeout(enableInput, 1000)
@@ -35,6 +50,10 @@ function updateStatus (status) {
 
   // Update the thumbnail scroller
   buildThumbnailScroller(status.slides)
+
+  // Scroll to proper slide thumbnail
+  location.href = '#'
+  location.href = `#slide-${status.position}`
 }
 
 function disableInput (message) {
@@ -51,6 +70,7 @@ function disableInput (message) {
 }
 
 function enableInput () {
+  console.log('Re-enabling input')
   // Restore the keyboard listener
   keyInputEnabled = true
 
@@ -59,44 +79,58 @@ function enableInput () {
 }
 
 function updateInfo (info) {
-  slidesInfo = info
+  if (info) {
+    slidesInfo = info
+  }
 }
 
 function gotoSlide (event) {
   event.preventDefault()
-  disableInput('Changing Slides ...')
-  let url = $(event.currentTarget).attr('href')
-  $.get(url, {}, (data) => {
-    updateStatus(data.state)
-  }, 'json')
+  console.error('GOTO not enabled')
+  // disableInput('Changing Slides ...')
+  // const url = $(event.currentTarget).attr('href')
+  // $.get(url, {}, (data) => {
+  //   updateStatus(data.state)
+  // }, 'json')
 }
 
 function pollCurrentState () {
-  // Update current state
-  $.get('state', {}, (data) => {
-    updateStatus(data.state)
-  }, 'json')
-
   // Update slideshow info
   $.get('info', {}, (data) => {
     updateInfo(data.info)
   }, 'json')
+
+  // Update current state
+  $.get('state', {}, (data) => {
+    updateStatus(data.state)
+  }, 'json')
 }
 
 function buildThumbnail (slideNum) {
-  let thumbDiv = $('<a />').addClass('thumbnail').attr('href', `jumpToSlide/${slideNum}`)
-  let imgElem = $('<img />').attr('src', `images/thumbs/Slide${slideNum}.jpeg`)
-  let labelElem = $('<span />').addClass('label label-primary').text(slideNum)
-  thumbDiv.append(imgElem)
-  thumbDiv.append(labelElem)
-  thumbDiv.click(gotoSlide)
-  return thumbDiv
+  const thumbLink = $('<a />').addClass('thumbnail')
+  thumbLink.attr('href', `jumpToSlide/${slideNum}`)
+  thumbLink.attr('id', `slide-${slideNum}`)
+  const imgElem = $('<img />').attr('src', `images/thumbs/Slide${slideNum}.jpeg`)
+  const labelElem = $('<span />').addClass('label label-primary').text(slideNum)
+
+  thumbLink.append(imgElem)
+  thumbLink.append(labelElem)
+  thumbLink.css('vertical-align', 'top')
+  thumbLink.click(gotoSlide)
+
+  if (Array.isArray(slidesInfo.notes) && slideNum <= slidesInfo.notes.length) {
+    const notesHTML = slidesInfo?.notes[slideNum - 1].replaceAll(/\r?\n/g, '<br/>')
+    const notesElem = $('<p />').html(notesHTML)
+    thumbLink.append(notesElem)
+  }
+
+  return thumbLink
 }
 
 function buildThumbnailScroller (slideCount) {
   $('#thumbnailScroll').empty()
   for (let i = 0; i < slideCount; i++) {
-    let newThumb = buildThumbnail(i + 1)
+    const newThumb = buildThumbnail(i + 1)
     $('#thumbnailScroll').append(newThumb)
   }
 }
@@ -121,7 +155,7 @@ $(document).ready(() => {
   // Fullscreen button
   $('#FSBtn').click((event) => {
     event.preventDefault()
-    let elem = document.documentElement
+    const elem = document.documentElement
     if (elem.requestFullscreen) {
       elem.requestFullscreen()
     } else if (elem.mozRequestFullScreen) { /* Firefox */

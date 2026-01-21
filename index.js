@@ -120,22 +120,27 @@ async function getShowState () {
   try {
     const state = await ppt.stat()
     state.buildSteps = state.steps
-    if (state.position < 1 || state.position > showInfo.titles.length) {
+    if (state.position < 1 || state.position > showInfo.notes.length) {
       state.slideTitle = '??'
       state.slideNotes = '??'
     } else {
-      state.slideTitle = showInfo.titles[state.position - 1]
-      state.slideNote = showInfo.notes[state.position - 1]
+      const index = state.position - 1
+      state.slideTitle = showInfo.titles?.[index]
+      state.slideNote = showInfo.notes?.[index]
 
-      state.prevNote = showInfo.notes[state.position - 2]
-      state.nextNote = showInfo.notes[state.position]
+      state.prevTitle = showInfo.titles?.[index]
+      state.prevNote = showInfo.notes?.[index - 1]
+      state.nextTitle = showInfo.titles?.[index + 1]
+      state.nextNote = showInfo.notes?.[index + 1]
 
-      if (state.position - 2 < 0) {
+      if (index - 1 < 0) {
         state.prevNote = ''
+        state.prevTitle = ''
       }
 
-      if (state.position >= showInfo.titles.length) {
+      if (index + 1 >= showInfo.notes.length) {
         state.nextNote = ''
+        state.nextTitle = ''
       }
     }
     return state
@@ -148,7 +153,9 @@ async function getShowState () {
 
 async function getShowInfo () {
   try {
-    return await ppt.info()
+    console.log('retrieving show info')
+    const showInfo = await ppt.info()
+    return showInfo
   } catch (err) {
     console.log('ERROR: ppt.info failed')
     console.log(err)
@@ -158,8 +165,9 @@ async function getShowInfo () {
 
 async function getShowThumbnails () {
   try {
-    const thumbPath = path.join('./', '/public/images/')
-    return await ppt.thumbs(thumbPath)
+    console.error('Generating thumbnails disabled')
+    // const thumbPath = path.join('./', '/public/images/')
+    return {}
   } catch (err) {
     console.log('ERROR: ppt.thumbs failed')
     console.log(err)
@@ -191,6 +199,7 @@ app.get('/info', async (req, res) => {
     const showInfo = await getShowInfo()
     res.send({ ok: true, info: showInfo })
   } catch (err) {
+    console.error('info error', err)
     res.send({ ok: false, error: err })
   }
 })
